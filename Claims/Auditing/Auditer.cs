@@ -1,38 +1,40 @@
 ﻿namespace Claims.Auditing
 {
-    public class Auditer
+    using Claims.Interfaces;
+
+    public class Auditer : IAuditer
     {
-        private readonly AuditContext _auditContext;
+        private readonly AuditContext auditContext;
 
         public Auditer(AuditContext auditContext)
         {
-            _auditContext = auditContext;
+            this.auditContext = auditContext;
         }
 
-        public void AuditClaim(string id, string httpRequestType)
+        public async Task AuditClaimAsync(string id, string httpRequestType)
         {
             var claimAudit = new ClaimAudit()
             {
-                Created = DateTime.Now,
+                Created = DateTime.UtcNow,
                 HttpRequestType = httpRequestType,
                 ClaimId = id
             };
 
-            _auditContext.Add(claimAudit);
-            _auditContext.SaveChanges();
+            await this.auditContext.AddAsync(claimAudit);
+            await this.auditContext.SaveChangesAsync();
         }
         
-        public void AuditCover(string id, string httpRequestType)
+        public async Task AuditCoverAsync(string id, string httpRequestType)
         {
             var coverAudit = new CoverAudit()
             {
-                Created = DateTime.Now,
+                Created = DateTime.UtcNow,
                 HttpRequestType = httpRequestType,
                 CoverId = id
             };
 
-            _auditContext.Add(coverAudit);
-            _auditContext.SaveChanges();
+            await this.auditContext.AddAsync(coverAudit);
+            await this.auditContext.SaveChangesAsync();
         }
     }
 }

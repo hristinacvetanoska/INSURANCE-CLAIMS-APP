@@ -1,8 +1,9 @@
-﻿using System.Text.Json.Serialization;
-using MongoDB.Bson.Serialization.Attributes;
-
-namespace Claims
+﻿namespace Claims.Domain.Models
 {
+    using Claims.Domain.Enums;
+    using MongoDB.Bson.Serialization.Attributes;
+    using System.ComponentModel.DataAnnotations;
+
     public class Claim
     {
         [BsonId]
@@ -12,7 +13,7 @@ namespace Claims
         public string CoverId { get; set; }
 
         [BsonElement("created")]
-        [BsonDateTimeOptions(DateOnly = true)]
+        //[BsonDateTimeOptions(DateOnly = true)]
         public DateTime Created { get; set; }
 
         [BsonElement("name")]
@@ -22,14 +23,7 @@ namespace Claims
         public ClaimType Type { get; set; }
 
         [BsonElement("damageCost")]
+        [Range(0, 100000, ErrorMessage = "DamageCost cannot exceed 100,000.")]
         public decimal DamageCost { get; set; }
-    }
-
-    public enum ClaimType
-    {
-        Collision = 0,
-        Grounding = 1,
-        BadWeather = 2,
-        Fire = 3
     }
 }
