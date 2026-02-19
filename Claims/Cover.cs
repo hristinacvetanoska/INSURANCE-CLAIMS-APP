@@ -20,6 +20,7 @@ public class Cover
 
     [BsonElement("premium")]
     public decimal Premium { get; set; }
+
 }
 
 public enum CoverType
