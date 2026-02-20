@@ -8,6 +8,9 @@
     using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Defines operations for managing covers.
+    /// </summary>
     public class CoverService : ICoverService
     {
         private readonly IPremiumCalculator premiumCalculator;
@@ -19,11 +22,20 @@
             this.coverRepository = coverRepository;
             this.auditer = auditer;
         }
+
+        /// <summary>
+        /// Retrieves all covers.
+        /// </summary>
         public Task<IEnumerable<Cover>> GetAllAsync()
         {
            return this.coverRepository.GetCoversAsync();
         }
 
+        /// <summary>
+        /// Retrieves a cover by its identifier.
+        /// </summary>
+        /// <param name="coverId">The cover id.</param>
+        /// <returns></returns>
         public async Task<Cover> GetByIdAsync(string coverId)
         {
             var cover = await this.coverRepository.GetCoverByIdAsync(coverId);
@@ -35,6 +47,12 @@
 
             return cover;
         }
+
+        /// <summary>
+        /// Creates coves.
+        /// </summary>
+        /// <param name="cover">The cover.</param>
+        /// <returns>The newly created cover.</returns>
         public async Task<Cover> CreateAsync(Cover cover)
         {
             if (cover == null)
@@ -65,6 +83,11 @@
             return cover;
         }
 
+        /// <summary>
+        /// Deletes the cover by id.
+        /// </summary>
+        /// <param name="coverId">The cover id.</param>
+        /// <returns></returns>
         public async Task DeleteAsync(string coverId)
         {
             var cover = await this.coverRepository.GetCoverByIdAsync(coverId);
@@ -78,6 +101,14 @@
             await this.auditer.AuditCoverAsync(coverId, "DELETE");
         }
 
+
+        /// <summary>
+        /// Computes the premium based on period and cover type.
+        /// </summary>
+        /// <param name="startDate">Cover start date.</param>
+        /// <param name="endDate">Cover end date.</param>
+        /// <param name="coverType">Type of cover.</param>
+        /// <returns>The calculated premium amount.</returns>
         public decimal ComputePremium(DateTime startDate, DateTime endDate, CoverType coverType)
         {
             if (endDate <= startDate)

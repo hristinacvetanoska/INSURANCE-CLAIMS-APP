@@ -5,11 +5,21 @@
     using Claims.Interfaces;
     using System.ComponentModel.DataAnnotations;
 
+    /// <summary>
+    /// Provides operations for managing claims.
+    /// </summary>
     public class ClaimService : IClaimService
     {
         private readonly IClaimRepository claimRepository;
         private readonly ICoverRepository coverRepository;
         private readonly IAuditer auditer;
+
+        /// <summary>
+        /// The constructor for Claim Service.
+        /// </summary>
+        /// <param name="claimRepository">The claim repository.</param>
+        /// <param name="coverRepository">The cover repository.</param>
+        /// <param name="auditer">The auditer.</param>
         public ClaimService(IClaimRepository claimRepository, ICoverRepository coverRepository, IAuditer auditer)
         { 
             this.claimRepository = claimRepository;
@@ -17,6 +27,12 @@
             this.auditer = auditer;
         }
 
+
+        /// <summary>
+        /// Creaates new claim.
+        /// </summary>
+        /// <param name="claim">The input claim.</param>
+        /// <returns>The created claim.</returns>
         public async Task<Claim> CreateAsync(Claim claim)
         {
             claim.Id = Guid.NewGuid().ToString();
@@ -38,6 +54,11 @@
             return claim;
         }
 
+        /// <summary>
+        /// Deletes the claim by id.
+        /// </summary>
+        /// <param name="claimId">The claim id.</param>
+        /// <returns></returns>
         public async Task DeleteAsync(string claimId)
         {
             var claim = await this.claimRepository.GetClaimByIdAsync(claimId);
@@ -51,11 +72,20 @@
             await this.auditer.AuditClaimAsync(claimId, "DELETE");
         }
 
+        /// <summary>
+        /// Get all claims.
+        /// </summary>
+        /// <returns>List of claims.</returns>
         public async Task<IEnumerable<Claim>> GetAllAsync()
         {
             return await this.claimRepository.GetClaimsAsync();
         }
 
+        /// <summary>
+        /// Gets claim by id.
+        /// </summary>
+        /// <param name="claimId">The claim id.</param>
+        /// <returns>The claim.</returns>
         public async Task<Claim> GetByIdAsync(string claimId)
         {
             var claim =  await this.claimRepository.GetClaimByIdAsync(claimId);
