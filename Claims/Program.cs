@@ -1,6 +1,5 @@
 using Claims;
 using Claims.Auditing;
-using Claims.Controllers;
 using Claims.Interfaces;
 using Claims.Repositories;
 using Claims.Services;
@@ -24,7 +23,6 @@ var sqlContainer = (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
 
 var mongoContainer = new MongoDbBuilder()
     .WithImage("mongo:latest")
-    //.WithBindMount("C:/Users/PC/source/repos/INSURANCE-CLAIMS-APP/INSURANCE-CLAIMS-APP/mongo-data", "/data/db") // persistent folder ?? ?????? ????
     .Build();
 
 await sqlContainer.StartAsync();
