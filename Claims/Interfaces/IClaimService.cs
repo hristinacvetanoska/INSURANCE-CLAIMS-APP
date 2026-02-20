@@ -22,7 +22,7 @@
         Task<ClaimDto> GetByIdAsync(string claimId);
 
         /// <summary>
-        /// Creaates new claim.
+        /// Creates new claim.
         /// </summary>
         /// <param name="claim">The input claim.</param>
         /// <returns>The created claim.</returns>

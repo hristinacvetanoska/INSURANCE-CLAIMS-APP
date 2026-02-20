@@ -30,15 +30,12 @@
 
 
         /// <summary>
-        /// Creaates new claim.
+        /// Creates new claim.
         /// </summary>
         /// <param name="claim">The input claim.</param>
         /// <returns>The created claim.</returns>
         public async Task<ClaimDto> CreateAsync(ClaimDto claimDTO)
         {
-            var claim = new Claim();
-            claim.Id = Guid.NewGuid().ToString();
-
             var cover = await this.coverRepository.GetCoverByIdAsync(claimDTO.CoverId);
 
             if(cover == null)
@@ -50,11 +47,16 @@
             {
                 throw new ValidationException("Claim date must be within the cover period.");
             }
-            claim.CoverId = claimDTO.CoverId;
-            claim.Created = claimDTO.Created;
-            claim.Name = claimDTO.Name;
-            claim.Type = claimDTO.Type;
-            claim.DamageCost = claimDTO.DamageCost;
+
+            var claim = new Claim
+            {
+                Id = Guid.NewGuid().ToString(),
+                CoverId = claimDTO.CoverId,
+                Created = claimDTO.Created,
+                Name = claimDTO.Name,
+                Type = claimDTO.Type,
+                DamageCost = claimDTO.DamageCost
+            };
 
             await this.claimRepository.AddClaimAsync(claim);
             await this.auditer.AuditClaimAsync(claim.Id, "POST");

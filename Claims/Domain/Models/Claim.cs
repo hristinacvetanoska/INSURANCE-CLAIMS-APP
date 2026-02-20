@@ -38,7 +38,7 @@
         /// <summary>
         /// Gets or sets the type of the claim.
         /// </summary>
-        [BsonElement("claimType")]
+        [BsonElement("type")]
         public ClaimType Type { get; set; }
 
         /// <summary>

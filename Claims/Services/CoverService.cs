@@ -70,7 +70,7 @@
         }
 
         /// <summary>
-        /// Creates coves.
+        /// Creates covers.
         /// </summary>
         /// <param name="cover">The cover.</param>
         /// <returns>The newly created cover.</returns>
@@ -85,14 +85,13 @@
             {
                 throw new ValidationException("Cover StartDate cannot be in the past.");
             }
-            if ((coverDto.EndDate - coverDto.StartDate).TotalDays > 365)
-            {
-                throw new ValidationException("Insurance period cannot exceed 1 year.");
-            }
-
             if (coverDto.EndDate <= coverDto.StartDate)
             {
                 throw new ValidationException("Cover EndDate must be after StartDate.");
+            }
+            if ((coverDto.EndDate - coverDto.StartDate).TotalDays > 365)
+            {
+                throw new ValidationException("Insurance period cannot exceed 1 year.");
             }
             var cover = new Cover
             {

@@ -12,40 +12,50 @@
     {
         private readonly IAuditQueue queue;
         private readonly IServiceScopeFactory scopeFactory;
+        private readonly ILogger<AuditBackgroundService> logger;
 
-        public AuditBackgroundService(IAuditQueue queue, IServiceScopeFactory scopeFactory)
+        public AuditBackgroundService(IAuditQueue queue, IServiceScopeFactory scopeFactory, ILogger<AuditBackgroundService> logger)
         {
             this.queue = queue;
             this.scopeFactory = scopeFactory;
+            this.logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await foreach (var message in queue.Reader.ReadAllAsync(stoppingToken))
             {
-                using var scope = scopeFactory.CreateScope();
-                var auditContext = scope.ServiceProvider.GetRequiredService<AuditContext>();
-
-                if (message.EntityType == "Claim")
+                try
                 {
-                    await auditContext.ClaimAudits.AddAsync(new ClaimAudit
+                    using var scope = scopeFactory.CreateScope();
+                    var auditContext = scope.ServiceProvider.GetRequiredService<AuditContext>();
+
+                    if (message.EntityType == "Claim")
                     {
-                        ClaimId = message.EntityId,
-                        Created = DateTime.UtcNow,
-                        HttpRequestType = message.HttpRequestType
-                    });
+                        await auditContext.ClaimAudits.AddAsync(new ClaimAudit
+                        {
+                            ClaimId = message.EntityId,
+                            Created = DateTime.UtcNow,
+                            HttpRequestType = message.HttpRequestType
+                        }, stoppingToken);
+                    }
+                    else
+                    {
+                        await auditContext.CoverAudits.AddAsync(new CoverAudit
+                        {
+                            CoverId = message.EntityId,
+                            Created = DateTime.UtcNow,
+                            HttpRequestType = message.HttpRequestType
+                        }, stoppingToken);
+                    }
+
+                    await auditContext.SaveChangesAsync(stoppingToken);
                 }
-                else
+                catch (Exception ex)
                 {
-                    await auditContext.CoverAudits.AddAsync(new CoverAudit
-                    {
-                        CoverId = message.EntityId,
-                        Created = DateTime.UtcNow,
-                        HttpRequestType = message.HttpRequestType
-                    });
+                    logger.LogError(ex, "Failed to persist audit message: {EntityType} {EntityId}", message.EntityType, message.EntityId);
                 }
 
-                await auditContext.SaveChangesAsync();
             }
         }
     }

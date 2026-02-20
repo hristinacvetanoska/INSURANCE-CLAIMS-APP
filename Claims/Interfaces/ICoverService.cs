@@ -22,7 +22,7 @@
         Task<CoverDto> GetByIdAsync(string coverId);
 
         /// <summary>
-        /// Creates coves.
+        /// Creates covers.
         /// </summary>
         /// <param name="cover">The cover.</param>
         /// <returns>The newly created cover.</returns>
