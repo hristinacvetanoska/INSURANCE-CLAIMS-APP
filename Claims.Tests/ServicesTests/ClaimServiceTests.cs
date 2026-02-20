@@ -121,7 +121,7 @@
 
         [Fact]
         public async Task CreateAsync_ThrowsNotFound_WhenCoverDoesNotExist()
-        {    
+        {
             // Assert
             var claim = new Claim
             {
@@ -163,6 +163,115 @@
             // Act & Assert
             await Assert.ThrowsAsync<ValidationException>(() =>
                 claimService.CreateAsync(claim));
+        }
+
+        [Fact]
+        public async Task CreateAsync_ThrowsValidationException_WhenDamageCostTooHigh()
+        {
+            // Arrange
+            var cover = new Cover
+            {
+                Id = "cover1",
+                StartDate = DateTime.UtcNow.AddDays(-1),
+                EndDate = DateTime.UtcNow.AddDays(10)
+            };
+
+            var claim = new Claim
+            {
+                CoverId = "cover1",
+                Created = DateTime.UtcNow,
+                DamageCost = 200000
+            };
+
+            this.mockCoverRepository
+                .Setup(r => r.GetCoverByIdAsync("cover1"))
+                .ReturnsAsync(cover);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ValidationException>(() =>
+                claimService.CreateAsync(claim));
+        }
+
+        [Fact]
+        public async Task GetAllAsync_ReturnsAllClaims()
+        {
+            // Arrange
+            var claims = new List<Claim>
+            {
+                new Claim { Id = "1" },
+                new Claim { Id = "2" }
+            };
+
+            this.mockClaimRepository
+                .Setup(r => r.GetClaimsAsync())
+                .ReturnsAsync(claims);
+
+            // Act
+            var result = await claimService.GetAllAsync();
+
+            // Assert
+            Assert.Equal(2, result.Count());
+
+        }
+
+        [Fact]
+        public async Task CreateAsync_AllowsCreatedOnCoverStartDate()
+        {
+            // Arrange
+            var cover = new Cover
+            {
+                Id = "cover1",
+                StartDate = DateTime.UtcNow.Date,
+                EndDate = DateTime.UtcNow.AddDays(10).Date
+            };
+
+            var claim = new Claim
+            {
+                CoverId = "cover1",
+                Created = cover.StartDate,
+                DamageCost = 5000
+            };
+
+            mockCoverRepository
+                .Setup(r => r.GetCoverByIdAsync("cover1"))
+                .ReturnsAsync(cover);
+
+            // Act
+            var result = await claimService.CreateAsync(claim);
+
+            // Assert
+            Assert.NotNull(result.Id);
+            mockClaimRepository.Verify(r => r.AddClaimAsync(claim), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateAsync_AllowsCreatedOnCoverEndDate()
+        {
+            // Arrange
+            var cover = new Cover
+            {
+                Id = "cover1",
+                StartDate = DateTime.UtcNow.AddDays(-10).Date,
+                EndDate = DateTime.UtcNow.Date
+            };
+
+            var claim = new Claim
+            {
+                CoverId = "cover1",
+                Created = cover.EndDate, // edge case
+                DamageCost = 5000
+            };
+
+            mockCoverRepository
+                .Setup(r => r.GetCoverByIdAsync("cover1"))
+                .ReturnsAsync(cover);
+
+            // Act
+            var result = await claimService.CreateAsync(claim);
+
+            // Assert
+            Assert.NotNull(result.Id);
+            mockClaimRepository.Verify(r => r.AddClaimAsync(claim), Times.Once);
         }
     }
 }
