@@ -1,6 +1,7 @@
 ﻿namespace Claims.Tests.Controllers
 {
     using Claims.Domain.Models;
+    using Claims.DTOs;
     using Claims.Exceptions;
     using Claims.Interfaces;
     using Microsoft.AspNetCore.Mvc.Testing;
@@ -58,10 +59,10 @@
         {
             // Arrange
             var mockService = new Mock<IClaimService>();
-            mockService.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Claim>
+            mockService.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<ClaimDto>
             {
-                new Claim { Id = "1", CoverId = "c1", Type = Domain.Enums.ClaimType.Collision },
-                new Claim { Id = "2", CoverId = "c2", Type = Domain.Enums.ClaimType.Fire }
+                new ClaimDto { Id = "1", CoverId = "c1", Type = Domain.Enums.ClaimType.Collision },
+                new ClaimDto { Id = "2", CoverId = "c2", Type = Domain.Enums.ClaimType.Fire }
             });
 
             var client = GetClientWithMocks(mockService);
@@ -80,7 +81,7 @@
         public async Task GetById_ReturnsClaim_WhenFound()
         {
             // Arrange
-            var expected = new Claim { Id = "1", CoverId = "c1", Type = Domain.Enums.ClaimType.Collision };
+            var expected = new ClaimDto { Id = "1", CoverId = "c1", Type = Domain.Enums.ClaimType.Collision };
             var mockService = new Mock<IClaimService>();
             mockService.Setup(s => s.GetByIdAsync("1")).ReturnsAsync(expected);
 

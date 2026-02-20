@@ -57,6 +57,7 @@
                 Type = claimDTO.Type,
                 DamageCost = claimDTO.DamageCost
             };
+            claimDTO.Id = claim.Id;
 
             await this.claimRepository.AddClaimAsync(claim);
             await this.auditer.AuditClaimAsync(claim.Id, "POST");

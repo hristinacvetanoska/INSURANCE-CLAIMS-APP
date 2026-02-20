@@ -2,7 +2,7 @@
 {
     using Claims.Controllers;
     using Claims.Domain.Enums;
-    using Claims.Domain.Models;
+    using Claims.DTOs;
     using Claims.Exceptions;
     using Claims.Interfaces;
     using Microsoft.AspNetCore.Mvc;
@@ -69,10 +69,10 @@
         public async Task GetAllAsync_ReturnsOkWithCovers()
         {
             // Arrange
-            var covers = new List<Cover>
+            var covers = new List<CoverDto>
             {
-                new Cover { Id = "c1", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(10), Type = CoverType.Yacht },
-                new Cover { Id = "c2", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(5), Type = CoverType.Tanker }
+                new CoverDto { Id = "c1", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(10), Type = CoverType.Yacht },
+                new CoverDto { Id = "c2", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(5), Type = CoverType.Tanker }
             };
 
             var mockService = new Mock<ICoverService>();
@@ -85,15 +85,15 @@
 
             // Assert
             var ok = Assert.IsType<OkObjectResult>(result.Result);
-            var returned = Assert.IsAssignableFrom<IEnumerable<Cover>>(ok.Value);
-            Assert.Equal(2, new List<Cover>(returned).Count);
+            var returned = Assert.IsAssignableFrom<IEnumerable<CoverDto>>(ok.Value);
+            Assert.Equal(2, new List<CoverDto>(returned).Count);
         }
 
         [Fact]
         public async Task GetById_ReturnsCover_WhenFound()
         {
             // Arrange
-            var expected = new Cover { Id = "c1", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(30), Type = CoverType.PassengerShip };
+            var expected = new CoverDto { Id = "c1", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(30), Type = CoverType.PassengerShip };
             var mockService = new Mock<ICoverService>();
             mockService.Setup(s => s.GetByIdAsync("c1")).ReturnsAsync(expected);
 
@@ -104,7 +104,7 @@
 
             // Assert
             var ok = Assert.IsType<OkObjectResult>(result.Result);
-            var cover = Assert.IsType<Cover>(ok.Value);
+            var cover = Assert.IsType<CoverDto>(ok.Value);
             Assert.Equal("c1", cover.Id);
         }
 
@@ -128,14 +128,14 @@
         public async Task CreateAsync_ReturnsCreated_WhenValid()
         {
             // Arrange
-            var input = new Cover
+            var input = new CoverDto
             {
                 StartDate = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc),
                 EndDate = new DateTime(2025, 01, 31, 0, 0, 0, DateTimeKind.Utc),
                 Type = CoverType.Yacht
             };
 
-            var created = new Cover
+            var created = new CoverDto
             {
                 Id = "newId",
                 StartDate = input.StartDate,
@@ -144,7 +144,7 @@
             };
 
             var mockService = new Mock<ICoverService>();
-            mockService.Setup(s => s.CreateAsync(It.IsAny<Cover>())).ReturnsAsync(created);
+            mockService.Setup(s => s.CreateAsync(It.IsAny<CoverDto>())).ReturnsAsync(created);
 
             var controller = CreateController(mockService);
 
@@ -153,17 +153,17 @@
 
             // Assert
             var createdResult = Assert.IsType<CreatedResult>(result);
-            var returned = Assert.IsType<Cover>(createdResult.Value);
+            var returned = Assert.IsType<CoverDto>(createdResult.Value);
             Assert.Equal(created.Id, returned.Id);
 
-            mockService.Verify(s => s.CreateAsync(It.Is<Cover>(c => c.Type == input.Type && c.StartDate == input.StartDate)), Times.Once);
+            mockService.Verify(s => s.CreateAsync(It.Is<CoverDto>(c => c.Type == input.Type && c.StartDate == input.StartDate)), Times.Once);
         }
 
         [Fact]
         public async Task CreateAsync_ReturnsBadRequest_OnValidationException()
         {
             // Arrange
-            var input = new Cover
+            var input = new CoverDto
             {
                 StartDate = DateTime.UtcNow.AddDays(-10),
                 EndDate = DateTime.UtcNow.AddDays(5),
@@ -171,7 +171,7 @@
             };
 
             var mockService = new Mock<ICoverService>();
-            mockService.Setup(s => s.CreateAsync(It.IsAny<Cover>())).ThrowsAsync(new ValidationException("Invalid"));
+            mockService.Setup(s => s.CreateAsync(It.IsAny<CoverDto>())).ThrowsAsync(new ValidationException("Invalid"));
 
             var controller = CreateController(mockService);
 

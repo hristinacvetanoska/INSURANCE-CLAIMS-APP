@@ -101,6 +101,8 @@
                 Id = Guid.NewGuid().ToString()
             };
             cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
+            coverDto.Premium = cover.Premium;
+            coverDto.Id = cover.Id;
 
             await this.coverRepository.AddCoverAsync(cover);
             await this.auditer.AuditCoverAsync(cover.Id, "POST");

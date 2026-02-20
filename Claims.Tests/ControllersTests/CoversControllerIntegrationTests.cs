@@ -2,6 +2,7 @@
 {
     using Claims.Domain.Enums;
     using Claims.Domain.Models;
+    using Claims.DTOs;
     using Claims.Exceptions;
     using Claims.Interfaces;
     using Microsoft.AspNetCore.Mvc.Testing;
@@ -60,10 +61,10 @@
         {
             // Arrange
             var mockService = new Mock<ICoverService>();
-            mockService.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Cover>
+            mockService.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<CoverDto>
             {
-                new Cover { Id = "c1", StartDate = DateTime.UtcNow.AddDays(-10), EndDate = DateTime.UtcNow.AddDays(10), Type = CoverType.BulkCarrier },
-                new Cover { Id = "c2", StartDate = DateTime.UtcNow.AddDays(-5), EndDate = DateTime.UtcNow.AddDays(5), Type = CoverType.Tanker }
+                new CoverDto { Id = "c1", StartDate = DateTime.UtcNow.AddDays(-10), EndDate = DateTime.UtcNow.AddDays(10), Type = CoverType.BulkCarrier },
+                new CoverDto { Id = "c2", StartDate = DateTime.UtcNow.AddDays(-5), EndDate = DateTime.UtcNow.AddDays(5), Type = CoverType.Tanker }
             });
 
             var client = GetClientWithMocks(mockService);
@@ -82,7 +83,7 @@
         public async Task GetById_ReturnsCover_WhenFound()
         {
             // Arrange
-            var expected = new Cover
+            var expected = new CoverDto
             {
                 Id = "c1",
                 StartDate = DateTime.UtcNow.AddDays(-1),
@@ -100,7 +101,7 @@
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var cover = await response.Content.ReadFromJsonAsync<Cover>(_jsonOptions);
+            var cover = await response.Content.ReadFromJsonAsync<CoverDto>(_jsonOptions);
             Assert.NotNull(cover);
             Assert.Equal("c1", cover.Id);
         }

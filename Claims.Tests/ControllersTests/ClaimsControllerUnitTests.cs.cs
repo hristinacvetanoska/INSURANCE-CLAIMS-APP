@@ -1,7 +1,7 @@
 ﻿namespace Claims.Tests.Controllers
 {
     using Claims.Controllers;
-    using Claims.Domain.Models;
+    using Claims.DTOs;
     using Claims.Exceptions;
     using Claims.Interfaces;
     using Microsoft.AspNetCore.Mvc;
@@ -22,10 +22,10 @@
         public async Task GetAllAsync_ReturnsOkWithClaims()
         {
             // Arrange
-            var claims = new List<Claim>
+            var claims = new List<ClaimDto>
             {
-                new Claim { Id = "1", CoverId = "c1" },
-                new Claim { Id = "2", CoverId = "c2" }
+                new ClaimDto { Id = "1", CoverId = "c1" },
+                new ClaimDto { Id = "2", CoverId = "c2" }
             };
 
             var mockService = new Mock<IClaimService>();
@@ -38,15 +38,15 @@
 
             // Assert
             var ok = Assert.IsType<OkObjectResult>(result.Result);
-            var returned = Assert.IsAssignableFrom<IEnumerable<Claim>>(ok.Value);
-            Assert.Equal(2, new List<Claim>(returned).Count);
+            var returned = Assert.IsAssignableFrom<IEnumerable<ClaimDto>>(ok.Value);
+            Assert.Equal(2, new List<ClaimDto>(returned).Count);
         }
 
         [Fact]
         public async Task GetByIdAsync_WhenFound_ReturnsOkWithClaim()
         {
             // Arrange
-            var expected = new Claim { Id = "1", CoverId = "c1" };
+            var expected = new ClaimDto { Id = "1", CoverId = "c1" };
             var mockService = new Mock<IClaimService>();
             mockService.Setup(s => s.GetByIdAsync("1")).ReturnsAsync(expected);
 
@@ -57,7 +57,7 @@
 
             // Assert
             var ok = Assert.IsType<OkObjectResult>(result.Result);
-            var returned = Assert.IsType<Claim>(ok.Value);
+            var returned = Assert.IsType<ClaimDto>(ok.Value);
             Assert.Equal(expected.Id, returned.Id);
         }
 
@@ -81,11 +81,11 @@
         public async Task CreateAsync_OnSuccess_ReturnsCreated()
         {
             // Arrange
-            var input = new Claim { CoverId = "c1" };
-            var created = new Claim { Id = "1", CoverId = "c1" };
+            var input = new ClaimDto { CoverId = "c1" };
+            var created = new ClaimDto { Id = "1", CoverId = "c1" };
 
             var mockService = new Mock<IClaimService>();
-            mockService.Setup(s => s.CreateAsync(It.IsAny<Claim>())).ReturnsAsync(created);
+            mockService.Setup(s => s.CreateAsync(It.IsAny<ClaimDto>())).ReturnsAsync(created);
 
             var controller = CreateController(mockService);
 
@@ -94,7 +94,7 @@
 
             // Assert
             var createdResult = Assert.IsType<CreatedResult>(result);
-            var returned = Assert.IsType<Claim>(createdResult.Value);
+            var returned = Assert.IsType<ClaimDto>(createdResult.Value);
             Assert.Equal(created.Id, returned.Id);
         }
 
@@ -102,7 +102,7 @@
         public async Task CreateAsync_OnValidationException_ReturnsBadRequest()
         {
             // Arrange
-            var input = new Claim { CoverId = "" };
+            var input = new ClaimDto { CoverId = "" };
             var mockService = new Mock<IClaimService>();
             mockService.Setup(s => s.CreateAsync(input)).ThrowsAsync(new ValidationException("Invalid"));
 

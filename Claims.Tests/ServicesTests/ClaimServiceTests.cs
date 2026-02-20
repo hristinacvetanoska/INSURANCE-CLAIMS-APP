@@ -1,6 +1,7 @@
 ﻿namespace Claims.Tests.ServicesTests
 {
     using Claims.Domain.Models;
+    using Claims.DTOs;
     using Claims.Exceptions;
     using Claims.Interfaces;
     using Claims.Services;
@@ -105,17 +106,22 @@
                 CoverId = "cover1",
                 Created = DateTime.UtcNow
             };
+            var claimDto = new ClaimDto
+            {
+                CoverId = claim.CoverId,
+                Created = claim.Created
+            };
 
             this.mockCoverRepository
                 .Setup(r => r.GetCoverByIdAsync("cover1"))
                 .ReturnsAsync(cover);
 
             // Act
-            var result = await claimService.CreateAsync(claim);
+            var result = await claimService.CreateAsync(claimDto);
 
             // Assert.
             Assert.NotNull(result.Id);
-            this.mockClaimRepository.Verify(r => r.AddClaimAsync(claim), Times.Once);
+            this.mockClaimRepository.Verify(r => r.AddClaimAsync(It.IsAny<Claim>()), Times.Once);
             this.mockAuditer.Verify(a => a.AuditClaimAsync(result.Id, "POST"), Times.Once);
         }
 
@@ -128,14 +134,18 @@
                 CoverId = "invalid",
                 Created = DateTime.UtcNow
             };
-
+            var claimDto = new ClaimDto
+            {
+                CoverId = claim.CoverId,
+                Created = claim.Created
+            };
             this.mockCoverRepository
                 .Setup(r => r.GetCoverByIdAsync("invalid"))
                 .ReturnsAsync((Cover)null);
 
             // Act & Assert
             await Assert.ThrowsAsync<NotFoundException>(() =>
-                claimService.CreateAsync(claim));
+                claimService.CreateAsync(claimDto));
         }
 
 
@@ -155,6 +165,11 @@
                 CoverId = "cover1",
                 Created = DateTime.UtcNow
             };
+            var claimDto = new ClaimDto
+            {
+                CoverId = claim.CoverId,
+                Created = claim.Created
+            };
 
             this.mockCoverRepository
                 .Setup(r => r.GetCoverByIdAsync("cover1"))
@@ -162,7 +177,7 @@
 
             // Act & Assert
             await Assert.ThrowsAsync<ValidationException>(() =>
-                claimService.CreateAsync(claim));
+                claimService.CreateAsync(claimDto));
         }
 
         [Fact]
@@ -204,17 +219,21 @@
                 Created = cover.StartDate,
                 DamageCost = 5000
             };
-
+            var claimDto = new ClaimDto
+            {
+                CoverId = claim.CoverId,
+                Created = claim.Created
+            };
             mockCoverRepository
                 .Setup(r => r.GetCoverByIdAsync("cover1"))
                 .ReturnsAsync(cover);
 
             // Act
-            var result = await claimService.CreateAsync(claim);
+            var result = await claimService.CreateAsync(claimDto);
 
             // Assert
             Assert.NotNull(result.Id);
-            mockClaimRepository.Verify(r => r.AddClaimAsync(claim), Times.Once);
+            mockClaimRepository.Verify(r => r.AddClaimAsync(It.IsAny<Claim>()), Times.Once);
         }
 
         [Fact]
@@ -231,20 +250,24 @@
             var claim = new Claim
             {
                 CoverId = "cover1",
-                Created = cover.EndDate, // edge case
+                Created = cover.EndDate,
                 DamageCost = 5000
             };
-
+            var claimDto = new ClaimDto
+            {
+                CoverId = claim.CoverId,
+                Created = claim.Created
+            };
             mockCoverRepository
                 .Setup(r => r.GetCoverByIdAsync("cover1"))
                 .ReturnsAsync(cover);
 
             // Act
-            var result = await claimService.CreateAsync(claim);
+            var result = await claimService.CreateAsync(claimDto);
 
             // Assert
             Assert.NotNull(result.Id);
-            mockClaimRepository.Verify(r => r.AddClaimAsync(claim), Times.Once);
+            mockClaimRepository.Verify(r => r.AddClaimAsync(It.IsAny<Claim>()), Times.Once);
         }
 
         [Fact]

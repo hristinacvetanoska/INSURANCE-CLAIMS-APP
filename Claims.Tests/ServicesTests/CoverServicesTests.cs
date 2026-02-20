@@ -2,6 +2,7 @@
 {
     using Claims.Domain.Enums;
     using Claims.Domain.Models;
+    using Claims.DTOs;
     using Claims.Exceptions;
     using Claims.Interfaces;
     using Claims.Services;
@@ -35,7 +36,7 @@
             var result = await coverService.GetAllAsync();
 
             // Assert
-            Assert.Equal(3, ((List<Cover>)result).Count);
+            Assert.Equal(3, ((List<CoverDto>)result).Count);
         }
 
         [Fact]
@@ -72,15 +73,21 @@
                 EndDate = DateTime.UtcNow.AddDays(30),
                 Type = CoverType.Yacht
             };
+            var coverDto = new CoverDto
+            {
+                StartDate = cover.StartDate,
+                EndDate = cover.EndDate,
+                Type = cover.Type
+            };
             this.mockPremiumCalculator.Setup(p => p.Compute(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CoverType>())).Returns(1000m);
 
             // Act
-            var result = await coverService.CreateAsync(cover);
+            var result = await coverService.CreateAsync(coverDto);
 
             // Assert
             Assert.NotNull(result.Id);
             Assert.Equal(1000m, result.Premium);
-            this.mockCoverRepository.Verify(r => r.AddCoverAsync(result), Times.Once);
+            this.mockCoverRepository.Verify(r => r.AddCoverAsync(It.IsAny<Cover>()), Times.Once);
             this.mockAuditer.Verify(a => a.AuditCoverAsync(result.Id, "POST"), Times.Once);
         }
 
@@ -94,9 +101,15 @@
                 EndDate = DateTime.UtcNow.AddDays(30),
                 Type = CoverType.Yacht
             };
+            var coverDto = new CoverDto
+            {
+                StartDate = cover.StartDate,
+                EndDate = cover.EndDate,
+                Type = cover.Type
+            };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ValidationException>(() => coverService.CreateAsync(cover));
+            await Assert.ThrowsAsync<ValidationException>(() => coverService.CreateAsync(coverDto));
         }
 
         [Fact]
@@ -109,9 +122,15 @@
                 EndDate = DateTime.UtcNow.AddDays(366),
                 Type = CoverType.Yacht
             };
+            var coverDto = new CoverDto
+            {
+                StartDate = cover.StartDate,
+                EndDate = cover.EndDate,
+                Type = cover.Type
+            };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ValidationException>(() => coverService.CreateAsync(cover));
+            await Assert.ThrowsAsync<ValidationException>(() => coverService.CreateAsync(coverDto));
         }
 
         [Fact]
@@ -162,20 +181,26 @@
             // Arrange
             var cover = new Cover
             {
-                StartDate = DateTime.UtcNow.Date, // edge
+                StartDate = DateTime.UtcNow.Date,
                 EndDate = DateTime.UtcNow.AddDays(30),
                 Type = CoverType.Yacht
+            };
+            var coverDto = new CoverDto
+            {
+                StartDate = cover.StartDate,
+                EndDate = cover.EndDate,
+                Type = cover.Type
             };
 
             mockPremiumCalculator.Setup(p => p.Compute(cover.StartDate, cover.EndDate, cover.Type)).Returns(1000m);
 
             // Act
-            var result = await coverService.CreateAsync(cover);
+            var result = await coverService.CreateAsync(coverDto);
 
             // Assert
             Assert.NotNull(result.Id);
             Assert.Equal(1000m, result.Premium);
-            mockCoverRepository.Verify(r => r.AddCoverAsync(result), Times.Once);
+            mockCoverRepository.Verify(r => r.AddCoverAsync(It.IsAny<Cover>()), Times.Once);
         }
 
         [Fact]
@@ -185,19 +210,25 @@
             var cover = new Cover
             {
                 StartDate = DateTime.UtcNow.Date,
-                EndDate = DateTime.UtcNow.Date.AddDays(365), // edge
+                EndDate = DateTime.UtcNow.Date.AddDays(365),
                 Type = CoverType.PassengerShip
+            };
+            var coverDto = new CoverDto
+            {
+                StartDate = cover.StartDate,
+                EndDate = cover.EndDate,
+                Type = cover.Type
             };
 
             mockPremiumCalculator.Setup(p => p.Compute(cover.StartDate, cover.EndDate, cover.Type)).Returns(2000m);
 
             // Act
-            var result = await coverService.CreateAsync(cover);
+            var result = await coverService.CreateAsync(coverDto);
 
             // Assert
             Assert.NotNull(result.Id);
             Assert.Equal(2000m, result.Premium);
-            mockCoverRepository.Verify(r => r.AddCoverAsync(result), Times.Once);
+            mockCoverRepository.Verify(r => r.AddCoverAsync(It.IsAny<Cover>()), Times.Once);
         }
 
         [Fact]
@@ -237,12 +268,18 @@
             var cover = new Cover
             {
                 StartDate = DateTime.UtcNow.Date,
-                EndDate = DateTime.UtcNow.AddDays(366), // invalid
+                EndDate = DateTime.UtcNow.AddDays(366),
                 Type = CoverType.Tanker
+            };
+            var coverDto = new CoverDto
+            {
+                StartDate = cover.StartDate,
+                EndDate = cover.EndDate,
+                Type = cover.Type
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ValidationException>(() => coverService.CreateAsync(cover));
+            await Assert.ThrowsAsync<ValidationException>(() => coverService.CreateAsync(coverDto));
         }
     }
 }
