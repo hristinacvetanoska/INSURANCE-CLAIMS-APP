@@ -55,3 +55,9 @@ Desired logic:
   * First 30 days are computed based on the logic above
   * Following 150 days are discounted by 5% for Yacht and by 2% for other types
   * The remaining days are discounted by additional 3% for Yacht and by 1% for other types
+
+Insurance Claims API
+
+A multi-tier backend application for managing insurance claims. This system allows users to create, read, and delete claims while enforcing validations and auditing.
+   
+ 
