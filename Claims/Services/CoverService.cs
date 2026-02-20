@@ -24,9 +24,9 @@
            return this.coverRepository.GetCoversAsync();
         }
 
-        public Task<Cover> GetByIdAsync(string coverId)
+        public async Task<Cover> GetByIdAsync(string coverId)
         {
-            var cover = this.coverRepository.GetCoverByIdAsync(coverId);
+            var cover = await this.coverRepository.GetCoverByIdAsync(coverId);
 
             if(cover == null)
             {

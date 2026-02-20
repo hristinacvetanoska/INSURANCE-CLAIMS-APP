@@ -1,6 +1,7 @@
 ﻿namespace Claims.Services
 {
     using Claims.Domain.Enums;
+    using Claims.Extensions;
     using Claims.Interfaces;
     using System;
 
@@ -8,24 +9,14 @@
     {
         public decimal Compute(DateTime startDate, DateTime endDate, CoverType coverType)
         {
-            var multiplier = 1.3m;
-            if (coverType == CoverType.Yacht)
+            if(endDate <= startDate)
             {
-                multiplier = 1.1m;
+                throw new ArgumentException("End date must be after start date.");
             }
 
-            if (coverType == CoverType.PassengerShip)
-            {
-                multiplier = 1.2m;
-            }
-
-            if (coverType == CoverType.Tanker)
-            {
-                multiplier = 1.5m;
-            }
-
-            var premiumPerDay = 1250 * multiplier;
-            var insuranceLength = (endDate - startDate).TotalDays;
+            var multiplier = coverType.GetMultiplier();
+            var premiumPerDay = 1250m * multiplier;
+            var insuranceLength = (endDate - startDate).Days;
             var totalPremium = 0m;
 
             for (var i = 0; i < insuranceLength; i++)
@@ -34,26 +25,26 @@
                 {
                     totalPremium += premiumPerDay;
                 }
-                if (i < 180)
+                else if (i>=30 && i < 180)
                 {
                     if(coverType == CoverType.Yacht)
                     {
-                        totalPremium += premiumPerDay - premiumPerDay * 0.05m;
+                        totalPremium += premiumPerDay * 0.95m;
                     }
                     else
                     {
-                        totalPremium += premiumPerDay - premiumPerDay * 0.02m;
+                        totalPremium += premiumPerDay * 0.98m;
                     }
                 }
-                if (i < 365)
+                else if (i >= 180)
                 {
                     if(coverType != CoverType.Yacht)
                     {
-                        totalPremium += premiumPerDay - premiumPerDay * 0.03m;
+                        totalPremium += premiumPerDay * 0.98m * 0.99m;
                     }
                     else
                     {
-                        totalPremium += premiumPerDay - premiumPerDay * 0.08m;
+                        totalPremium += premiumPerDay * 0.95m * 0.97m;
                     }
                 }
             }

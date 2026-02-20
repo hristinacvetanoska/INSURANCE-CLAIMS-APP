@@ -20,7 +20,7 @@
         public async Task<Claim> CreateAsync(Claim claim)
         {
             claim.Id = Guid.NewGuid().ToString();
-            var cover = this.coverRepository.GetCoverByIdAsync(claim.CoverId).Result;
+            var cover = await this.coverRepository.GetCoverByIdAsync(claim.CoverId);
 
             if(cover == null)
             {
@@ -58,7 +58,14 @@
 
         public async Task<Claim> GetByIdAsync(string claimId)
         {
-            return await this.claimRepository.GetClaimByIdAsync(claimId);
+            var claim =  await this.claimRepository.GetClaimByIdAsync(claimId);
+
+            if (claim == null)
+            {
+                throw new NotFoundException($"Claim with id={claimId} not found.");
+            }
+
+            return claim;
         }
     }
 }

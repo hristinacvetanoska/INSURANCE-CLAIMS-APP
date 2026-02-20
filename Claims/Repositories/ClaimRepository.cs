@@ -17,7 +17,7 @@
         {
             return await this.claimsContext.Claims.ToListAsync();
         }
-        public async Task<Claim> GetClaimByIdAsync(string claimId)
+        public async Task<Claim?> GetClaimByIdAsync(string claimId)
         {
             return await this.claimsContext.Claims
                            .Where(claim => claim.Id == claimId)

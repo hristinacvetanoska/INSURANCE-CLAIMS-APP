@@ -14,7 +14,7 @@
             this.claimsContext = claimsContext;
         }
 
-        public async Task<Cover> GetCoverByIdAsync(string coverId)
+        public async Task<Cover?> GetCoverByIdAsync(string coverId)
         {
             return await this.claimsContext.Covers.Where(cover => cover.Id == coverId).SingleOrDefaultAsync();
         }

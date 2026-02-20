@@ -4,37 +4,35 @@
 
     public class Auditer : IAuditer
     {
-        private readonly AuditContext auditContext;
+        private readonly IAuditQueue queue;
 
-        public Auditer(AuditContext auditContext)
+        public Auditer(IAuditQueue queue)
         {
-            this.auditContext = auditContext;
+            this.queue = queue;
         }
 
-        public async Task AuditClaimAsync(string id, string httpRequestType)
+        public Task AuditClaimAsync(string id, string httpRequestType)
         {
-            var claimAudit = new ClaimAudit()
+            queue.Enqueue(new AuditMessage
             {
-                Created = DateTime.UtcNow,
+                EntityId = id,
                 HttpRequestType = httpRequestType,
-                ClaimId = id
-            };
+                EntityType = "Claim"
+            });
 
-            await this.auditContext.AddAsync(claimAudit);
-            await this.auditContext.SaveChangesAsync();
+            return Task.CompletedTask;
         }
         
-        public async Task AuditCoverAsync(string id, string httpRequestType)
+        public Task AuditCoverAsync(string id, string httpRequestType)
         {
-            var coverAudit = new CoverAudit()
+            queue.Enqueue(new AuditMessage
             {
-                Created = DateTime.UtcNow,
+                EntityId = id,
                 HttpRequestType = httpRequestType,
-                CoverId = id
-            };
+                EntityType = "Cover"
+            });
 
-            await this.auditContext.AddAsync(coverAudit);
-            await this.auditContext.SaveChangesAsync();
+            return Task.CompletedTask;
         }
     }
 }
