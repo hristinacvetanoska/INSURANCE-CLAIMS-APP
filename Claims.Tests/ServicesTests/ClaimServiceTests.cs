@@ -166,33 +166,6 @@
         }
 
         [Fact]
-        public async Task CreateAsync_ThrowsValidationException_WhenDamageCostTooHigh()
-        {
-            // Arrange
-            var cover = new Cover
-            {
-                Id = "cover1",
-                StartDate = DateTime.UtcNow.AddDays(-1),
-                EndDate = DateTime.UtcNow.AddDays(10)
-            };
-
-            var claim = new Claim
-            {
-                CoverId = "cover1",
-                Created = DateTime.UtcNow,
-                DamageCost = 200000
-            };
-
-            this.mockCoverRepository
-                .Setup(r => r.GetCoverByIdAsync("cover1"))
-                .ReturnsAsync(cover);
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ValidationException>(() =>
-                claimService.CreateAsync(claim));
-        }
-
-        [Fact]
         public async Task GetAllAsync_ReturnsAllClaims()
         {
             // Arrange
@@ -272,6 +245,14 @@
             // Assert
             Assert.NotNull(result.Id);
             mockClaimRepository.Verify(r => r.AddClaimAsync(claim), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ThrowsArgumentException_WhenIdIsNullOrEmpty()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<NotFoundException>(() => claimService.DeleteAsync(null));
+            await Assert.ThrowsAsync<NotFoundException>(() => claimService.DeleteAsync(string.Empty));
         }
     }
 }

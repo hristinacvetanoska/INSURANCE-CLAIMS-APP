@@ -155,5 +155,94 @@
             Assert.Equal(500m, result);
             mockPremiumCalculator.Verify(p => p.Compute(startDate, endDate, coverType), Times.Once);
         }
+
+        [Fact]
+        public async Task CreateAsync_AllowsStartDateToday()
+        {
+            // Arrange
+            var cover = new Cover
+            {
+                StartDate = DateTime.UtcNow.Date, // edge
+                EndDate = DateTime.UtcNow.AddDays(30),
+                Type = CoverType.Yacht
+            };
+
+            mockPremiumCalculator.Setup(p => p.Compute(cover.StartDate, cover.EndDate, cover.Type)).Returns(1000m);
+
+            // Act
+            var result = await coverService.CreateAsync(cover);
+
+            // Assert
+            Assert.NotNull(result.Id);
+            Assert.Equal(1000m, result.Premium);
+            mockCoverRepository.Verify(r => r.AddCoverAsync(result), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateAsync_AllowsEndDateExactlyOneYearAfterStart()
+        {
+            // Arrange
+            var cover = new Cover
+            {
+                StartDate = DateTime.UtcNow.Date,
+                EndDate = DateTime.UtcNow.Date.AddDays(365), // edge
+                Type = CoverType.PassengerShip
+            };
+
+            mockPremiumCalculator.Setup(p => p.Compute(cover.StartDate, cover.EndDate, cover.Type)).Returns(2000m);
+
+            // Act
+            var result = await coverService.CreateAsync(cover);
+
+            // Assert
+            Assert.NotNull(result.Id);
+            Assert.Equal(2000m, result.Premium);
+            mockCoverRepository.Verify(r => r.AddCoverAsync(result), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ThrowsArgumentException_WhenIdIsNullOrEmpty()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<NotFoundException>(() => coverService.DeleteAsync(null));
+            await Assert.ThrowsAsync<NotFoundException>(() => coverService.DeleteAsync(string.Empty));
+        }
+
+        [Theory]
+        [InlineData(CoverType.Yacht, 1.1)]
+        [InlineData(CoverType.PassengerShip, 1.2)]
+        [InlineData(CoverType.Tanker, 1.5)]
+        [InlineData(CoverType.BulkCarrier, 1.3)]
+        public void ComputePremium_ReturnsCorrectMultiplier(CoverType type, decimal expectedMultiplier)
+        {
+            // Arrange
+            var startDate = DateTime.UtcNow;
+            var endDate = DateTime.UtcNow.AddDays(10);
+
+            mockPremiumCalculator.Setup(p => p.Compute(startDate, endDate, type))
+                .Returns(1250m * expectedMultiplier);
+
+            // Act
+            var result = coverService.ComputePremium(startDate, endDate, type);
+
+            // Assert
+            Assert.Equal(1250m * expectedMultiplier, result);
+            mockPremiumCalculator.Verify(p => p.Compute(startDate, endDate, type), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateAsync_ThrowsValidationException_WhenPeriodExceedsOneYear()
+        {
+            // Arrange
+            var cover = new Cover
+            {
+                StartDate = DateTime.UtcNow.Date,
+                EndDate = DateTime.UtcNow.AddDays(366), // invalid
+                Type = CoverType.Tanker
+            };
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ValidationException>(() => coverService.CreateAsync(cover));
+        }
     }
 }
