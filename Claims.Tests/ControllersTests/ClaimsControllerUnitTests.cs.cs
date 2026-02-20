@@ -85,7 +85,7 @@
             var created = new Claim { Id = "1", CoverId = "c1" };
 
             var mockService = new Mock<IClaimService>();
-            mockService.Setup(s => s.CreateAsync(input)).ReturnsAsync(created);
+            mockService.Setup(s => s.CreateAsync(It.IsAny<Claim>())).ReturnsAsync(created);
 
             var controller = CreateController(mockService);
 
