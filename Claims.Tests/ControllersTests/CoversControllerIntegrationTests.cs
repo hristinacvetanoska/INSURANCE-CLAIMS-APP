@@ -9,6 +9,7 @@
     using Moq;
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Net;
     using System.Net.Http.Json;
@@ -136,7 +137,7 @@
 
             // Act
             var url = $"/Covers/compute?startDate={Uri.EscapeDataString(start.ToString("o"))}&endDate={Uri.EscapeDataString(end.ToString("o"))}&coverType={coverType}";
-            var response = await client.PostAsync(url, null);
+            var response = await client.GetAsync(url);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -153,12 +154,12 @@
             var coverType = CoverType.BulkCarrier;
 
             var mockService = new Mock<ICoverService>();
-            mockService.Setup(s => s.ComputePremium(start, end, coverType)).Throws(new ArgumentException("Invalid period"));
+            mockService.Setup(s => s.ComputePremium(start, end, coverType)).Throws(new ValidationException("Invalid period"));
 
             var client = GetClientWithMocks(mockService);
 
             var url = $"/Covers/compute?startDate={Uri.EscapeDataString(start.ToString("o"))}&endDate={Uri.EscapeDataString(end.ToString("o"))}&coverType={coverType}";
-            var response = await client.PostAsync(url, null);
+            var response = await client.GetAsync(url);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

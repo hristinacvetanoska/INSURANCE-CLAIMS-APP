@@ -102,7 +102,7 @@
         public async Task CreateAsync_OnValidationException_ReturnsBadRequest()
         {
             // Arrange
-            var input = new Claim { CoverId = "" }; // invalid for example
+            var input = new Claim { CoverId = "" };
             var mockService = new Mock<IClaimService>();
             mockService.Setup(s => s.CreateAsync(input)).ThrowsAsync(new ValidationException("Invalid"));
 

@@ -6,6 +6,10 @@ namespace Claims.Controllers
     using Microsoft.AspNetCore.Mvc;
     using System.ComponentModel.DataAnnotations;
 
+    /// <summary>
+    /// REST API controller for managing Claims.
+    /// Provides endpoints to list, read, create and delete claims.
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class ClaimsController : ControllerBase
@@ -19,6 +23,12 @@ namespace Claims.Controllers
             this.logger = logger;
         }
 
+        /// <summary>
+        /// Retrieve all claims.
+        /// </summary>
+        /// <returns>Collection of <see cref="Claim"/>.</returns>
+        /// <response code="200">List of claims returned.</response>
+        /// <response code="500">Unexpected server error.</response>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Claim>>> GetAllAsync()
         {
@@ -34,6 +44,14 @@ namespace Claims.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieve a claim by id.
+        /// </summary>
+        /// <param name="id">Identifier of the claim.</param>
+        /// <returns>The requested <see cref="Claim"/>.</returns>
+        /// <response code="200">Claim found and returned.</response>
+        /// <response code="404">Claim not found.</response>
+        /// <response code="500">Unexpected server error.</response>
         [HttpGet("{id}")]
         public async Task<ActionResult<Claim>> GetByIdAsync(string id)
         {
@@ -53,6 +71,15 @@ namespace Claims.Controllers
             }
         }
 
+        /// <summary>
+        /// Create a new claim.
+        /// </summary>
+        /// <param name="claim">Claim model to create.</param>
+        /// <returns>Created <see cref="Claim"/> with assigned id.</returns>
+        /// <response code="201">Claim created successfully.</response>
+        /// <response code="400">Validation failed for the provided claim.</response>
+        /// <response code="404">Related cover not found.</response>
+        /// <response code="500">Unexpected server error.</response>
         [HttpPost]
         public async Task<IActionResult> CreateAsync(Claim claim)
         {
@@ -81,6 +108,13 @@ namespace Claims.Controllers
             }
         }
 
+        /// <summary>
+        /// Delete a claim by id.
+        /// </summary>
+        /// <param name="id">Identifier of the claim to delete.</param>
+        /// <response code="204">Claim deleted successfully.</response>
+        /// <response code="404">Claim not found.</response>
+        /// <response code="500">Unexpected server error.</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(string id)
         {

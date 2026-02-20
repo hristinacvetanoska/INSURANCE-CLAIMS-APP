@@ -51,18 +51,6 @@
         }
 
         [Fact]
-        public void Compute_ThrowsArgumentException_WhenEndDateBeforeStartDate()
-        {
-            // Arrange
-            var startDate = DateTime.UtcNow;
-            var endDate = startDate.AddDays(-1);
-            var coverType = CoverType.Yacht;
-
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => calculator.Compute(startDate, endDate, coverType));
-        }
-
-        [Fact]
         public void Compute_ReturnsPremium_Yacht_180Days()
         {
             // Arrange

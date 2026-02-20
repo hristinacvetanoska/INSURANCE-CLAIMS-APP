@@ -9,11 +9,6 @@
     {
         public decimal Compute(DateTime startDate, DateTime endDate, CoverType coverType)
         {
-            if(endDate <= startDate)
-            {
-                throw new ArgumentException("End date must be after start date.");
-            }
-
             var multiplier = coverType.GetMultiplier();
             var premiumPerDay = 1250m * multiplier;
             var insuranceLength = (endDate - startDate).Days;

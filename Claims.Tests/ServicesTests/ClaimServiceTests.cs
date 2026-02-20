@@ -89,7 +89,6 @@
                 claimService.DeleteAsync("1"));
         }
 
-
         [Fact]
         public async Task CreateAsync_SuccessfullyCreatesClaim_WhenValid()
         {

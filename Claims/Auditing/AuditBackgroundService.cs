@@ -3,6 +3,11 @@
     using Claims.Interfaces;
     using Microsoft.Extensions.Hosting;
 
+    /// <summary>
+    /// Background service that consumes audit messages from the in-memory queue and persists them to the AuditContext.
+    /// This implementation is resilient: it catches and logs exceptions per-message so a single failing save does not stop the service,
+    /// respects cancellation via the provided <see cref="CancellationToken"/>, and uses the DI scope factory per message.
+    /// </summary>
     public class AuditBackgroundService : BackgroundService
     {
         private readonly IAuditQueue queue;

@@ -37,8 +37,10 @@
         }
         public async Task<Cover> CreateAsync(Cover cover)
         {
-            cover.Id = Guid.NewGuid().ToString();
-            cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
+            if (cover == null)
+            {
+                throw new ArgumentNullException(nameof(cover));
+            }
 
             if (cover.StartDate.Date < DateTime.UtcNow.Date)
             {
@@ -48,6 +50,14 @@
             {
                 throw new ValidationException("Insurance period cannot exceed 1 year.");
             }
+
+            if (cover.EndDate <= cover.StartDate)
+            {
+                throw new ValidationException("Cover EndDate must be after StartDate.");
+            }
+
+            cover.Id = Guid.NewGuid().ToString();
+            cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
 
             await this.coverRepository.AddCoverAsync(cover);
             await this.auditer.AuditCoverAsync(cover.Id, "POST");
@@ -70,6 +80,11 @@
 
         public decimal ComputePremium(DateTime startDate, DateTime endDate, CoverType coverType)
         {
+            if (endDate <= startDate)
+            {
+                throw new ValidationException("Cover EndDate must be after StartDate.");
+            }
+
             return this.premiumCalculator.Compute(startDate, endDate, coverType);
         }
     }

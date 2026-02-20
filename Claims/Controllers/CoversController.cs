@@ -7,6 +7,11 @@ namespace Claims.Controllers
     using Microsoft.AspNetCore.Mvc;
     using System.ComponentModel.DataAnnotations;
 
+
+    /// <summary>
+    /// REST API controller for managing Covers.
+    /// Provides endpoints to compute premium, list, read, create and delete covers.
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class CoversController : ControllerBase
@@ -20,18 +25,28 @@ namespace Claims.Controllers
             this.logger = logger;
         }
 
-        [HttpPost("compute")]
-        public ActionResult<decimal> ComputePremium(DateTime startDate, DateTime endDate, CoverType coverType)
+        /// <summary>
+        /// Compute the premium for a cover period and cover type.
+        /// </summary>
+        /// <param name="startDate">Start date of the cover (ISO 8601).</param>
+        /// <param name="endDate">End date of the cover (ISO 8601).</param>
+        /// <param name="coverType">Type of cover.</param>
+        /// <returns>Computed premium as decimal.</returns>
+        /// <response code="200">Premium computed successfully.</response>
+        /// <response code="400">Invalid input (e.g., end date before start date).</response>
+        /// <response code="500">Unexpected server error.</response>
+        [HttpGet("compute")]
+        public ActionResult<decimal> ComputePremium([FromQuery] DateTime startDate, [FromQuery] DateTime endDate, [FromQuery] CoverType coverType)
         {
-            this.logger.LogInformation(
-                   "ComputePremium called. StartDate: {StartDate}, EndDate: {EndDate}, CoverType: {CoverType}",
-                   startDate, endDate, coverType);
             try
             {
+                this.logger.LogInformation(
+                       "ComputePremium called. StartDate: {StartDate}, EndDate: {EndDate}, CoverType: {CoverType}",
+                       startDate, endDate, coverType);
                 return Ok(this.coverService.ComputePremium(startDate, endDate, coverType));
 
             }
-            catch (ArgumentException ex) 
+            catch (ValidationException ex) 
             {
                 this.logger.LogWarning(ex,
                             "Invalid input for ComputePremium. StartDate: {StartDate}, EndDate: {EndDate}, CoverType: {CoverType}",
@@ -49,6 +64,12 @@ namespace Claims.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieve all covers.
+        /// </summary>
+        /// <returns>Collection of <see cref="Cover"/>.</returns>
+        /// <response code="200">List of covers returned.</response>
+        /// <response code="500">Unexpected server error.</response>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cover>>> GetAllAsync()
         {
@@ -64,6 +85,14 @@ namespace Claims.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieve a cover by id.
+        /// </summary>
+        /// <param name="id">Identifier of the cover.</param>
+        /// <returns>The requested <see cref="Cover"/>.</returns>
+        /// <response code="200">Cover found and returned.</response>
+        /// <response code="404">Cover not found.</response>
+        /// <response code="500">Unexpected server error.</response>
         [HttpGet("{id}")]
         public async Task<ActionResult<Cover>> GetByIdAsync(string id)
         {
@@ -87,6 +116,14 @@ namespace Claims.Controllers
             }
         }
 
+        /// <summary>
+        /// Create a new cover.
+        /// </summary>
+        /// <param name="cover">Cover model to create.</param>
+        /// <returns>Created <see cref="Cover"/> with assigned id and computed premium.</returns>
+        /// <response code="201">Cover created successfully.</response>
+        /// <response code="400">Invalid input or validation failed.</response>
+        /// <response code="500">Unexpected server error.</response>
         [HttpPost]
         public async Task<IActionResult> CreateAsync(Cover cover)
         {
@@ -118,6 +155,13 @@ namespace Claims.Controllers
             }
         }
 
+        /// <summary>
+        /// Delete a cover by id.
+        /// </summary>
+        /// <param name="id">Identifier of the cover to delete.</param>
+        /// <response code="204">Cover deleted successfully.</response>
+        /// <response code="404">Cover not found.</response>
+        /// <response code="500">Unexpected server error.</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(string id)
         {
