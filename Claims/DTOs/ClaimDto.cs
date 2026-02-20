@@ -1,18 +1,11 @@
-﻿namespace Claims.Domain.Models
+﻿namespace Claims.DTOs
 {
     using Claims.Domain.Enums;
     using MongoDB.Bson.Serialization.Attributes;
     using System.ComponentModel.DataAnnotations;
 
-    /// <summary>
-    /// Represents an insurance claim associated with a specific cover.
-    /// </summary>
-    public class Claim
+    public class ClaimDto
     {
-        /// <summary>
-        /// Gets or sets the unique identifier of the claim.
-        /// </summary>
-        [BsonId]
         public string Id { get; set; }
 
         /// <summary>

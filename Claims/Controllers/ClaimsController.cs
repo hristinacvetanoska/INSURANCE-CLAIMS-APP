@@ -1,9 +1,11 @@
 namespace Claims.Controllers
 {
     using Claims.Domain.Models;
+    using Claims.DTOs;
     using Claims.Exceptions;
     using Claims.Interfaces;
     using Microsoft.AspNetCore.Mvc;
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
@@ -30,12 +32,13 @@ namespace Claims.Controllers
         /// <response code="200">List of claims returned.</response>
         /// <response code="500">Unexpected server error.</response>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Claim>>> GetAllAsync()
+        public async Task<ActionResult<IEnumerable<ClaimDto>>> GetAllAsync()
         {
             try
             {
                 this.logger.LogInformation("GetAllAsync called to retrieve all claims");
-                return Ok(await this.claimService.GetAllAsync());
+                var claims = await this.claimService.GetAllAsync() ?? new List<ClaimDto>();
+                return Ok(claims);
             }
             catch (Exception ex)
             {
@@ -53,14 +56,14 @@ namespace Claims.Controllers
         /// <response code="404">Claim not found.</response>
         /// <response code="500">Unexpected server error.</response>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Claim>> GetByIdAsync(string id)
+        public async Task<ActionResult<ClaimDto>> GetByIdAsync(string id)
         {
 
             try
             {
                 return Ok(await this.claimService.GetByIdAsync(id));
             }
-            catch (NotFoundException ex)
+            catch (NotFoundException)
             {
                 return NotFound("Claim not found.");
             }
@@ -81,13 +84,13 @@ namespace Claims.Controllers
         /// <response code="404">Related cover not found.</response>
         /// <response code="500">Unexpected server error.</response>
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(Claim claim)
+        public async Task<IActionResult> CreateAsync(ClaimDto claimDto)
         {
-            this.logger.LogInformation("CreateAsync called for Claim: {@Claim}", claim);
+            this.logger.LogInformation("CreateAsync called for Claim: {@Claim}", claimDto);
 
             try
             {
-                var createdClaim = await this.claimService.CreateAsync(claim);
+                var createdClaim = await this.claimService.CreateAsync(claimDto);
                 this.logger.LogInformation("Claim created: {@CreatedClaim}", createdClaim);
                 return Created("", createdClaim);
             }
@@ -103,7 +106,7 @@ namespace Claims.Controllers
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "Error creating claim: {@Claim}", claim);
+                this.logger.LogError(ex, "Error creating claim: {@Claim}", claimDto);
                 return StatusCode(500, "An error occurred while creating the claim.");
             }
         }

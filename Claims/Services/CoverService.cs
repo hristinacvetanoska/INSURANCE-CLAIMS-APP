@@ -2,6 +2,7 @@
 {
     using Claims.Domain.Enums;
     using Claims.Domain.Models;
+    using Claims.DTOs;
     using Claims.Exceptions;
     using Claims.Interfaces;
     using System.Collections.Generic;
@@ -26,9 +27,22 @@
         /// <summary>
         /// Retrieves all covers.
         /// </summary>
-        public Task<IEnumerable<Cover>> GetAllAsync()
+        public Task<IEnumerable<CoverDto>> GetAllAsync()
         {
-           return this.coverRepository.GetCoversAsync();
+           var covers = this.coverRepository.GetCoversAsync();
+            var coverDtos = new List<CoverDto>();
+            foreach (var cover in covers.Result)
+            {
+                coverDtos.Add(new CoverDto
+                {
+                    Id = cover.Id,
+                    StartDate = cover.StartDate,
+                    EndDate = cover.EndDate,
+                    Type = cover.Type,
+                    Premium = cover.Premium
+                });
+            }
+            return Task.FromResult<IEnumerable<CoverDto>>(coverDtos);
         }
 
         /// <summary>
@@ -36,7 +50,7 @@
         /// </summary>
         /// <param name="coverId">The cover id.</param>
         /// <returns></returns>
-        public async Task<Cover> GetByIdAsync(string coverId)
+        public async Task<CoverDto> GetByIdAsync(string coverId)
         {
             var cover = await this.coverRepository.GetCoverByIdAsync(coverId);
 
@@ -45,7 +59,14 @@
                 throw new NotFoundException($"Cover with id={coverId} not found.");
             }
 
-            return cover;
+            return new CoverDto
+            {
+                Id = cover.Id,
+                StartDate = cover.StartDate,
+                EndDate = cover.EndDate,
+                Type = cover.Type,
+                Premium = cover.Premium
+            };
         }
 
         /// <summary>
@@ -53,34 +74,39 @@
         /// </summary>
         /// <param name="cover">The cover.</param>
         /// <returns>The newly created cover.</returns>
-        public async Task<Cover> CreateAsync(Cover cover)
+        public async Task<CoverDto> CreateAsync(CoverDto coverDto)
         {
-            if (cover == null)
+            if (coverDto == null)
             {
-                throw new ArgumentNullException(nameof(cover));
+                throw new ArgumentNullException(nameof(coverDto));
             }
 
-            if (cover.StartDate.Date < DateTime.UtcNow.Date)
+            if (coverDto.StartDate.Date < DateTime.UtcNow.Date)
             {
                 throw new ValidationException("Cover StartDate cannot be in the past.");
             }
-            if ((cover.EndDate - cover.StartDate).TotalDays > 365)
+            if ((coverDto.EndDate - coverDto.StartDate).TotalDays > 365)
             {
                 throw new ValidationException("Insurance period cannot exceed 1 year.");
             }
 
-            if (cover.EndDate <= cover.StartDate)
+            if (coverDto.EndDate <= coverDto.StartDate)
             {
                 throw new ValidationException("Cover EndDate must be after StartDate.");
             }
-
-            cover.Id = Guid.NewGuid().ToString();
+            var cover = new Cover
+            {
+                StartDate = coverDto.StartDate,
+                EndDate = coverDto.EndDate,
+                Type = coverDto.Type,
+                Id = Guid.NewGuid().ToString()
+            };
             cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
 
             await this.coverRepository.AddCoverAsync(cover);
             await this.auditer.AuditCoverAsync(cover.Id, "POST");
 
-            return cover;
+            return coverDto;
         }
 
         /// <summary>

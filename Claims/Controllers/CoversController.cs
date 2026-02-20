@@ -2,6 +2,7 @@ namespace Claims.Controllers
 {
     using Claims.Domain.Enums;
     using Claims.Domain.Models;
+    using Claims.DTOs;
     using Claims.Exceptions;
     using Claims.Interfaces;
     using Microsoft.AspNetCore.Mvc;
@@ -71,12 +72,14 @@ namespace Claims.Controllers
         /// <response code="200">List of covers returned.</response>
         /// <response code="500">Unexpected server error.</response>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Cover>>> GetAllAsync()
+        public async Task<ActionResult<IEnumerable<CoverDto>>> GetAllAsync()
         {
             try
             {
+
                 this.logger.LogInformation("GetAllAsync called to retrieve all covers");
-                return Ok(await this.coverService.GetAllAsync());
+                var covers = await this.coverService.GetAllAsync() ?? new List<CoverDto>();
+                return Ok(covers);
             }
             catch (Exception ex)
             {
@@ -94,7 +97,7 @@ namespace Claims.Controllers
         /// <response code="404">Cover not found.</response>
         /// <response code="500">Unexpected server error.</response>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Cover>> GetByIdAsync(string id)
+        public async Task<ActionResult<CoverDto>> GetByIdAsync(string id)
         {
             this.logger.LogInformation("GetByIdAsync called with ID: {CoverId}", id);
 
@@ -125,32 +128,32 @@ namespace Claims.Controllers
         /// <response code="400">Invalid input or validation failed.</response>
         /// <response code="500">Unexpected server error.</response>
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(Cover cover)
+        public async Task<IActionResult> CreateAsync(CoverDto coverDto)
         {
-            this.logger.LogInformation("CreateAsync called for cover: {@Cover}", cover);
+            this.logger.LogInformation("CreateAsync called for cover: {@Cover}", coverDto);
 
             try
             {
-                var createdCover = await this.coverService.CreateAsync(cover);
-                this.logger.LogInformation("Cover created with ID: {CoverId}", createdCover.Id);
+                var createdCover = await this.coverService.CreateAsync(coverDto);
+                this.logger.LogInformation("Cover created: {@Cover}", createdCover);
                 return Created("", createdCover);
             }
             catch(ArgumentNullException ae)
             {
                 this.logger.LogWarning(ae,
                             "Invalid input for ComputePremium. StartDate: {StartDate}, EndDate: {EndDate}, CoverType: {CoverType}",
-                            cover.StartDate, cover.EndDate, cover.Type);
+                            coverDto.StartDate, coverDto.EndDate, coverDto.Type);
 
                 return BadRequest(ae.Message);
             }
             catch(ValidationException ex)
             {
-                this.logger.LogWarning("Validation failed for cover: {@Cover}. Error: {Error}", cover, ex.Message);
+                this.logger.LogWarning("Validation failed for cover: {@Cover}. Error: {Error}", coverDto, ex.Message);
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "Error creating cover: {@Cover}", cover);
+                this.logger.LogError(ex, "Error creating cover: {@Cover}", coverDto);
                 return StatusCode(500, "An error occurred while creating the cover.");
             }
         }

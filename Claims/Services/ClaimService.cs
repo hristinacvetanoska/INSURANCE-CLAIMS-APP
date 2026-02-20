@@ -1,6 +1,7 @@
 ﻿namespace Claims.Services
 {
     using Claims.Domain.Models;
+    using Claims.DTOs;
     using Claims.Exceptions;
     using Claims.Interfaces;
     using System.ComponentModel.DataAnnotations;
@@ -33,25 +34,32 @@
         /// </summary>
         /// <param name="claim">The input claim.</param>
         /// <returns>The created claim.</returns>
-        public async Task<Claim> CreateAsync(Claim claim)
+        public async Task<ClaimDto> CreateAsync(ClaimDto claimDTO)
         {
+            var claim = new Claim();
             claim.Id = Guid.NewGuid().ToString();
-            var cover = await this.coverRepository.GetCoverByIdAsync(claim.CoverId);
+
+            var cover = await this.coverRepository.GetCoverByIdAsync(claimDTO.CoverId);
 
             if(cover == null)
             {
-                throw new NotFoundException($"Cover with id={claim.CoverId} not found.");
+                throw new NotFoundException($"Cover with id={claimDTO.CoverId} not found.");
             }
 
-            if(claim.Created < cover.StartDate || claim.Created > cover.EndDate)
+            if(claimDTO.Created.Date < cover.StartDate.Date || claimDTO.Created.Date > cover.EndDate.Date)
             {
                 throw new ValidationException("Claim date must be within the cover period.");
             }
+            claim.CoverId = claimDTO.CoverId;
+            claim.Created = claimDTO.Created;
+            claim.Name = claimDTO.Name;
+            claim.Type = claimDTO.Type;
+            claim.DamageCost = claimDTO.DamageCost;
 
             await this.claimRepository.AddClaimAsync(claim);
             await this.auditer.AuditClaimAsync(claim.Id, "POST");
 
-            return claim;
+            return claimDTO;
         }
 
         /// <summary>
@@ -76,9 +84,23 @@
         /// Get all claims.
         /// </summary>
         /// <returns>List of claims.</returns>
-        public async Task<IEnumerable<Claim>> GetAllAsync()
+        public async Task<IEnumerable<ClaimDto>> GetAllAsync()
         {
-            return await this.claimRepository.GetClaimsAsync();
+            var claims = await this.claimRepository.GetClaimsAsync();
+            var claimsDTOs = new List<ClaimDto>();
+            foreach (var claim in claims)
+            {
+               claimsDTOs.Add(new ClaimDto
+                {
+                    Id = claim.Id,
+                    CoverId = claim.CoverId,
+                    Created = claim.Created,
+                    Name = claim.Name,
+                    Type = claim.Type,
+                    DamageCost = claim.DamageCost
+                });
+            }
+            return claimsDTOs;
         }
 
         /// <summary>
@@ -86,7 +108,7 @@
         /// </summary>
         /// <param name="claimId">The claim id.</param>
         /// <returns>The claim.</returns>
-        public async Task<Claim> GetByIdAsync(string claimId)
+        public async Task<ClaimDto> GetByIdAsync(string claimId)
         {
             var claim =  await this.claimRepository.GetClaimByIdAsync(claimId);
 
@@ -95,7 +117,15 @@
                 throw new NotFoundException($"Claim with id={claimId} not found.");
             }
 
-            return claim;
+            return new ClaimDto
+            {
+                Id = claim.Id,
+                CoverId = claim.CoverId,
+                Created = claim.Created,
+                Name = claim.Name,
+                Type = claim.Type,
+                DamageCost = claim.DamageCost
+            };
         }
     }
 }

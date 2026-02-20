@@ -2,6 +2,7 @@
 {
     using Claims.Domain.Enums;
     using Claims.Domain.Models;
+    using Claims.DTOs;
 
     /// <summary>
     /// Defines operations for managing covers.
@@ -11,21 +12,21 @@
         /// <summary>
         /// Retrieves all covers.
         /// </summary>
-        Task<IEnumerable<Cover>> GetAllAsync();
+        Task<IEnumerable<CoverDto>> GetAllAsync();
 
         /// <summary>
         /// Retrieves a cover by its identifier.
         /// </summary>
         /// <param name="coverId">The cover id.</param>
         /// <returns></returns>
-        Task<Cover> GetByIdAsync(string coverId);
+        Task<CoverDto> GetByIdAsync(string coverId);
 
         /// <summary>
         /// Creates coves.
         /// </summary>
         /// <param name="cover">The cover.</param>
         /// <returns>The newly created cover.</returns>
-        Task<Cover> CreateAsync(Cover cover);
+        Task<CoverDto> CreateAsync(CoverDto cover);
 
         /// <summary>
         /// Deletes the cover by id.

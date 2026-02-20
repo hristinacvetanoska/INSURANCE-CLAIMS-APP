@@ -1,18 +1,10 @@
-namespace Claims.Domain.Models
-{
-    using Claims.Domain.Enums;
-    using MongoDB.Bson.Serialization.Attributes;
+﻿using Claims.Domain.Enums;
+using MongoDB.Bson.Serialization.Attributes;
 
-    /// <summary>
-    /// Represents an insurance cover policy that defines coverage details
-    /// such as validity period, type of coverage, and premium amount.
-    /// </summary>
-    public class Cover
+namespace Claims.DTOs
+{
+    public class CoverDto
     {
-        /// <summary>
-        /// Gets or sets the unique identifier for the Cover.
-        /// </summary>
-        [BsonId]
         public string Id { get; set; }
 
         /// <summary>
